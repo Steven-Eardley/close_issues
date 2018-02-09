@@ -1,6 +1,5 @@
 import time
 from functools import wraps
-""" Rate limit a function call, from DOAJ / GitHub issue closer """
 
 
 def rate_limited(freq=float('inf')):
@@ -11,9 +10,9 @@ def rate_limited(freq=float('inf')):
     Example usage:
     @rate_limited(0.5)
     def my_func():
-        #do something
+        # do something
 
-    Would allow my_func() to run at 0.5 Hertz, or twice per second.
+    Would allow my_func() to run at 0.5 Hertz, or once every 2 seconds.
     """
     def decorator(fn):
         @wraps(fn)
@@ -22,7 +21,7 @@ def rate_limited(freq=float('inf')):
             try:
                 diff = time.time() - rl_last_run
             except NameError:
-                diff = float('inf')         # Never run, so infinite diff
+                diff = float('inf')              # Never run, so infinite diff
             if diff < 1.0 / float(freq):
                 time.sleep(1.0 / freq - diff)
             rl_last_run = time.time()

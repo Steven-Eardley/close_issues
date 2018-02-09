@@ -2,8 +2,10 @@
 
 """
 Close open github issues by searching for a string in the title.
-This useful for closing issues migrated from another repo which gain '[CLOSED]' substring, as caused by
+This is useful for closing issues migrated from another repo which are prepended by '[CLOSED]', as caused by
 https://github.com/IQAndreas/github-issues-import
+
+Steven Eardley, Feb 2018.
 """
 
 import requests
