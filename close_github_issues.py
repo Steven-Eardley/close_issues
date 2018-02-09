@@ -27,6 +27,7 @@ def search_issues_by_string(search_string, repo):
     return issue_nums
 
 
+# Then close issues one-by one
 @rate_limited(2.0)
 def close_issue_by_number(num, repo):
 
