@@ -27,6 +27,16 @@ def search_issues_by_string(search_string, repo):
     return issue_nums
 
 
+def match_all_issues(repo):
+    next_req = requests.Request('GET', API_BASE + '/repos/{0}/issues'.format(repo)).prepare().url
+    issue_nums = []
+    while next_req is not None:
+        resp = requests.get(next_req, headers=HEADER)
+        issue_nums.extend([iss['number'] for iss in resp.json() if iss.get('pull_request') is None])
+        next_req = resp.links.get('next', {}).get('url')
+    return issue_nums
+
+
 # Then close issues one-by one
 @rate_limited(2.0)
 def close_issue_by_number(num, repo):
@@ -43,14 +53,19 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-a', '--auth', help='your OAuth2 token', required=True)
+    parser.add_argument('-o', '--oauth', help='your OAuth2 token', required=True)
+    parser.add_argument('-r', '--repo', help='repository to search', required=True)
     parser.add_argument('-s', '--search_string', help='the substring you want to match issues with', default='[closed]')
-    parser.add_argument('-r', '--repo', help="repository to search", default='DOAJ/doajPM')
+    parser.add_argument('-a', '--all_open', help="close all open issues (not PRs). Don't set -s.", action='store_true')
     args = parser.parse_args()
 
-    HEADER['Authorization'] = 'Bearer ' + args.auth
+    HEADER['Authorization'] = 'Bearer ' + args.oauth
 
-    issues = search_issues_by_string(args.search_string, args.repo)
+    if args.all_open:
+        issues = match_all_issues(args.repo)
+    else:
+        issues = search_issues_by_string(args.search_string, args.repo)
+
     delete = input('{} issues found. Close these? [y/N]: '.format(len(issues)))
     if delete.lower() == 'y':
         [close_issue_by_number(i, args.repo) for i in issues]
